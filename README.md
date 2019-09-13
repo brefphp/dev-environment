@@ -4,4 +4,11 @@ Thanks to that image you can easily get started with Bref without having to inst
 
 ## Usage
 
-TODO
+Run any command in the container:
+
+```bash
+docker run --rm -it bref/dev-env <command>
+
+# For example:
+docker run --rm -it bref/dev-env php -v
+```
