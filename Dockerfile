@@ -14,7 +14,7 @@ RUN curl -sS https://getcomposer.org/installer | php \
 RUN pip3 install --upgrade --user awscli && echo 'export PATH=/root/.local/bin:$PATH'>/root/.bashrc
 
 # Install serverless
-RUN curl -o- -L https://slss.io/install | bash
+RUN npm install -g serverless
 
 RUN docker-php-ext-install zip
 
