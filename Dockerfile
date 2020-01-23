@@ -16,7 +16,7 @@ RUN pip3 install --upgrade --user awscli && echo 'export PATH=/root/.local/bin:$
 # Install serverless
 RUN npm install -g serverless
 
-RUN docker-php-ext-install zip
+RUN docker-php-ext-install zip pdo_mysql
 
 RUN mkdir -p /var/task
 
