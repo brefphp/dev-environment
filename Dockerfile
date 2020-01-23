@@ -1,4 +1,4 @@
-FROM php:7
+FROM php:7.4
 ​
 # Install npm
 RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - \
@@ -14,4 +14,8 @@ RUN pip3 install --upgrade --user awscli && echo 'export PATH=/root/.local/bin:$
 
 # Install serverless
 RUN npm install -g serverless
+
+RUN mkdir -p /var/task
+
+WORKDIR /var/task
 ​
