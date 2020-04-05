@@ -1,26 +1,36 @@
-FROM php:7.4
+FROM composer:1.10.4
 
-# Install npm
-# libzip-dev: for the PHP zip extension (used by Composer)
-RUN curl -sL https://deb.nodesource.com/setup_12.x | bash - \
-    && apt update && apt install -y git ssh apache2-utils nodejs python3-pip libzip-dev zip && rm -rf /var/lib/apt/lists/*
+# composer:1.10.4
+#   https://github.com/composer/docker/blob/master/1.10/Dockerfile
+#   based on php:7-alpine
+#     https://github.com/docker-library/php/blob/master/7.4/alpine3.11/cli/Dockerfile
+#     based on alpine:3.11
 
-# Install Composer
-RUN curl -sS https://getcomposer.org/installer | php \
-    && mv composer.phar /usr/local/bin/composer \
-    && chmod +x /usr/local/bin/composer
+# Package Dependencies:
+#   serverless
+#     docker
+#   awscli
+#     groff
+RUN adduser -D -G users -h /home/app app \
+    && composer global require hirak/prestissimo \
+    && apk add --no-cache \
+        docker=19.03.5-r0 \
+        yarn=1.19.2-r0 \
+        groff=1.22.4-r0 \
+    && yarn global add serverless@1.67.0 \
+    && pip3 install \
+        --progress-bar off \
+        --no-cache-dir \
+        --disable-pip-version-check \
+        awscli==1.18.39
 
-# Install the `aws` CLI tool
-RUN pip3 install --upgrade --user awscli && echo 'export PATH=/root/.local/bin:$PATH'>/root/.bashrc
+USER app
+ENV PATH=$PATH:/tmp/vendor/bin \
+    COMPOSER_ALLOW_SUPERUSER=0 \
+    COMPOSER_HOME=/app/.composer
+VOLUME /app
+VOLUME /home/app/.aws
+VOLUME /var/run/docker.sock
+WORKDIR /app
 
-# Install serverless
-RUN npm install -g serverless
-
-RUN docker-php-ext-install zip pdo_mysql
-
-RUN mkdir -p /var/task
-
-# Register the Serverless and AWS bin directories
-ENV PATH="/root/.serverless/bin:/root/.local/bin:${PATH}"
-
-WORKDIR '/var/task'
+ENTRYPOINT ["/bin/sh", "/docker-entrypoint.sh"]

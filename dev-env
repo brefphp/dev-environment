@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+set -eu
+
+declare -a POSSIBLE_DOCKER_SOCK_PATHS=(
+    /run/docker.sock
+    /var/run/docker.sock
+)
+DOCKER_SOCK_PATH=
+readonly DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+readonly AWS_CONF_DIR="${HOME}/.aws"
+
+for path in "${POSSIBLE_DOCKER_SOCK_PATHS[@]}" ; do
+    if [[ -S "${path}" ]]; then
+        DOCKER_SOCK_PATH="${path}"
+        break
+    fi
+done
+
+if [[ -z "${DOCKER_SOCK_PATH}" ]]; then
+    echo "Unable to locate Docker socket."
+    echo "Please make sure Docker service is installed."
+    exit 1
+fi
+
+if [[ ! -d "${AWS_CONF_DIR}" ]]; then
+    echo "AWS settings directory is not found in ${AWS_CONF_DIR}"
+    exit 1
+fi
+
+docker run --rm --interactive --tty \
+    --user "$(id -u)":"$(id -g)" \
+    --group-add "${DOCKER_GROUP_ID}" \
+    --volume "${DOCKER_SOCK_PATH}:/var/run/docker.sock" \
+    --volume "${AWS_CONF_DIR}:/home/app/.aws" \
+    --volume "${PWD}/:/app" \
+    "bref/dev-env" "$@"
