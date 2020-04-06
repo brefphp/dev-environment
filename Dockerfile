@@ -23,4 +23,4 @@ RUN mkdir -p /var/task
 # Register the Serverless and AWS bin directories
 ENV PATH="/root/.serverless/bin:/root/.local/bin:${PATH}"
 
-WORKDIR '/var/task​'
+WORKDIR '/var/task'
