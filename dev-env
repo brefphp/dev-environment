@@ -31,7 +31,8 @@ fi
 docker run --rm --interactive --tty \
     --user "$(id -u)":"$(id -g)" \
     --group-add "${DOCKER_GROUP_ID}" \
+    --env HOST_AWS_CONF_DIR="${AWS_CONF_DIR}" \
     --volume "${DOCKER_SOCK_PATH}:/var/run/docker.sock" \
     --volume "${AWS_CONF_DIR}:/home/app/.aws" \
-    --volume "${PWD}/:/app" \
+    --volume "${PWD}:/app" \
     "bref/dev-env" "$@"
