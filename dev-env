@@ -2,6 +2,7 @@
 
 set -eu
 
+# This is an array of where the Docker socket usually is on most distributions
 declare -a POSSIBLE_DOCKER_SOCK_PATHS=(
     /run/docker.sock
     /var/run/docker.sock
@@ -10,6 +11,7 @@ DOCKER_SOCK_PATH=
 readonly DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
 readonly AWS_CONF_DIR="${HOME}/.aws"
 
+# Find out which of the possible paths for Docker socket is valid
 for path in "${POSSIBLE_DOCKER_SOCK_PATHS[@]}" ; do
     if [[ -S "${path}" ]]; then
         DOCKER_SOCK_PATH="${path}"

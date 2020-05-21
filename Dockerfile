@@ -11,6 +11,9 @@ FROM composer:1.10.4
 #     docker
 #   awscli
 #     groff
+# hirak/prestissimo: accelerates installing Composer dependencies
+# yarn: npm alternative
+# groff: needed by the AWS cli
 RUN adduser -D -G users -h /home/app app \
     && composer global require hirak/prestissimo \
     && apk add --no-cache \
