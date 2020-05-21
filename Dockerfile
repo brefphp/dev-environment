@@ -29,11 +29,8 @@ RUN adduser -D -G users -h /home/app app \
 
 USER app
 ENV PATH=$PATH:/tmp/vendor/bin \
-    COMPOSER_ALLOW_SUPERUSER=0 \
-    COMPOSER_HOME=/app/.composer
-VOLUME /app
+    COMPOSER_HOME=/var/task/.composer
+VOLUME /var/task
 VOLUME /home/app/.aws
 VOLUME /var/run/docker.sock
-WORKDIR /app
-
-ENTRYPOINT ["/bin/sh", "/docker-entrypoint.sh"]
+WORKDIR /var/task
