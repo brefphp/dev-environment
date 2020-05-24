@@ -1,0 +1,48 @@
+#!/usr/bin/env bash
+
+set -eu
+
+# This is an array of where the Docker socket usually is on most distributions
+declare -a POSSIBLE_DOCKER_SOCK_PATHS=(
+    /run/docker.sock
+    /var/run/docker.sock
+)
+
+# Path to your `docker.sock` file is required for `serverless invoke local --docker -f myFunction` to work.
+DOCKER_SOCK_PATH=
+readonly DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
+readonly AWS_CONF_DIR="${HOME}/.aws"
+
+# Find out which of the possible paths for Docker socket is valid
+for path in "${POSSIBLE_DOCKER_SOCK_PATHS[@]}" ; do
+    if [[ -S "${path}" ]]; then
+        DOCKER_SOCK_PATH="${path}"
+        break
+    fi
+done
+
+if [[ -z "${DOCKER_SOCK_PATH}" ]]; then
+    echo "Unable to locate Docker socket."
+    echo "Please make sure Docker service is installed."
+    exit 1
+fi
+
+if [[ ! -d "${AWS_CONF_DIR}" ]]; then
+    echo "AWS settings directory is not found in ${AWS_CONF_DIR}"
+    exit 1
+fi
+
+# --user So that all files created in container are actually owned by the user running this container
+# --group-add Sets GID of a user able to run Docker since docker commands run in container
+#   will still be run via Docker socket so user running this container needs to be able to work with it
+# The `HOST_AWS_CONF_DIR` ENV variable is needed for running `bref/dashboard`.
+#   It's because we can't simply use volume mappings from inside of `bref/dev-env` container
+#   since in case of Docker in Docker mappings are from host instead.
+docker run --rm --interactive --tty \
+    --user "$(id -u)":"$(id -g)" \
+    --group-add "${DOCKER_GROUP_ID}" \
+    --env HOST_AWS_CONF_DIR="${AWS_CONF_DIR}" \
+    --volume "${DOCKER_SOCK_PATH}:/var/run/docker.sock" \
+    --volume "${AWS_CONF_DIR}:/home/app/.aws" \
+    --volume "${PWD}:/app" \
+    "bref/dev-env" "$@"
