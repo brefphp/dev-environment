@@ -7,6 +7,8 @@ declare -a POSSIBLE_DOCKER_SOCK_PATHS=(
     /run/docker.sock
     /var/run/docker.sock
 )
+
+# Path to your `docker.sock` file is required for `serverless invoke local --docker -f myFunction` to work.
 DOCKER_SOCK_PATH=
 readonly DOCKER_GROUP_ID=$(getent group docker | cut -d: -f3)
 readonly AWS_CONF_DIR="${HOME}/.aws"
@@ -30,6 +32,12 @@ if [[ ! -d "${AWS_CONF_DIR}" ]]; then
     exit 1
 fi
 
+# --user So that all files created in container are actually owned by the user running this container
+# --group-add Sets GID of a user able to run Docker since docker commands run in container
+#   will still be run via Docker socket so user running this container needs to be able to work with it
+# The `HOST_AWS_CONF_DIR` ENV variable is needed for running `bref/dashboard`.
+#   It's because we can't simply use volume mappings from inside of `bref/dev-env` container
+#   since in case of Docker in Docker mappings are from host instead.
 docker run --rm --interactive --tty \
     --user "$(id -u)":"$(id -g)" \
     --group-add "${DOCKER_GROUP_ID}" \

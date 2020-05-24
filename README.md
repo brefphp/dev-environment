@@ -4,7 +4,7 @@ Thanks to that image you can easily get started with Bref without having to inst
 
 ## Usage
 
-Run any command in the container using `./dev-env.sh`:
+Run any command in the container using `./dev-env`:
 
 ```bash
 ./dev-env <command>
@@ -16,10 +16,6 @@ Run any command in the container using `./dev-env.sh`:
 You can also clone this repo and make a symlink of `dev-env` script to somewhere in your `$PATH`.
 
 ## Explanations
-
-Path to your `docker.sock` file is required for `serverless invoke local --docker -f myFunction` to work.
-
-The `HOST_AWS_CONF_DIR` ENV variable is needed for running `bref/dashboard`. It's because we can't simply use volume mappings from inside of `bref/dev-env` container since in case of Docker in Docker mappings are from host instead.
 
 Bref is NOT preinstalled in `bref/dev-env` image. For it to work you have to first install it via `./dev-env composer require bref/bref`. This will create not only typical `vendor` directory in your project but also `.composer` directory for Composer cache, which you can add to your `.gitignore` file.
 
